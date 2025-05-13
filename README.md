@@ -2,6 +2,8 @@
 
 A modern campaign management system built with React, TypeScript, and Supabase. This application helps users create, manage, and analyze marketing campaigns with AI-powered message generation.
 
+🚀 **Live Demo:** [https://project-hmj8xg2is-ashirvaddubeys-projects.vercel.app](https://project-hmj8xg2is-ashirvaddubeys-projects.vercel.app)
+
 ## Features
 
 - 🔐 User Authentication with Google OAuth
@@ -63,7 +65,7 @@ src/
 
 ## Deployment
 
-The application is deployed on Vercel. Any push to the main branch will trigger an automatic deployment.
+The application is deployed on Vercel at [https://project-hmj8xg2is-ashirvaddubeys-projects.vercel.app](https://project-hmj8xg2is-ashirvaddubeys-projects.vercel.app). Any push to the main branch will trigger an automatic deployment.
 
 ## Environment Variables
 
