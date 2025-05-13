@@ -34,16 +34,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for existing session
     const checkSession = async () => {
       try {
+        console.log('Checking session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
         
         if (session?.user) {
+          console.log('Session found:', session.user);
           setUser({
             id: session.user.id,
             email: session.user.email || '',
             name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '',
             avatar: session.user.user_metadata?.avatar_url || '',
           });
+        } else {
+          console.log('No session found');
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -57,6 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       if (session?.user) {
         setUser({
           id: session.user.id,
@@ -80,6 +85,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('Starting login process...');
+      console.log('Redirect URL:', getRedirectUrl());
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -91,7 +99,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
+      
+      console.log('Login initiated successfully');
     } catch (error) {
       console.error('Login failed:', error);
       setError('Failed to sign in with Google');
@@ -105,9 +118,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('Starting logout process...');
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
       setUser(null);
+      console.log('Logout successful');
     } catch (error) {
       console.error('Logout failed:', error);
       setError('Failed to sign out');

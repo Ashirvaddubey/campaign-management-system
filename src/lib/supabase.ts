@@ -25,7 +25,11 @@ export const supabase = createClient(
 
 // Helper function to get the redirect URL
 export const getRedirectUrl = () => {
-  // Always use the current origin for the callback
+  // For Vercel deployment
+  if (window.location.hostname !== 'localhost') {
+    return 'https://project-hmj8xg2is-ashirvaddubeys-projects.vercel.app/auth/callback';
+  }
+  // For local development
   return `${window.location.origin}/auth/callback`;
 };
 
