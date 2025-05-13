@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import { ToggleLeft as Google, BarChart2 } from 'lucide-react';
+import { FaGithub } from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
   const { isAuthenticated, login, isLoading } = useAuth();
@@ -30,61 +31,36 @@ const LoginPage: React.FC = () => {
   }
   
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <div className="mx-auto h-14 w-14 flex items-center justify-center rounded-full bg-blue-100">
-          <BarChart2 className="h-8 w-8 text-blue-600" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Campaign Management System</h1>
+          <p className="text-gray-600">Streamline your marketing campaigns with AI</p>
         </div>
-        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-          Sign in to CampaignHQ
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-500">
-          Manage your campaigns and reach your audience effectively
-        </p>
-      </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <div className="space-y-4">
-          <Button
-            onClick={handleLogin}
-            icon={<Google size={18} />}
-            fullWidth
-            className="py-2.5"
-          >
-            Sign in with Google
-          </Button>
-          
-          <div className="relative mt-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">Or continue with</span>
-            </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Key Features:</h2>
+            <ul className="text-gray-600 space-y-2">
+              <li>• AI-Powered Content Generation</li>
+              <li>• Real-time Analytics Dashboard</li>
+              <li>• Smart Audience Segmentation</li>
+              <li>• Secure Data Management</li>
+            </ul>
           </div>
-          
-          <div>
-            <Button 
-              variant="outline" 
-              onClick={() => {}} 
-              fullWidth
-              className="py-2.5"
-            >
-              Continue as Demo User
-            </Button>
-          </div>
-        </div>
 
-        <p className="mt-10 text-center text-sm text-gray-500">
-          By signing in, you agree to our{' '}
-          <a href="#" className="font-semibold leading-6 text-blue-600 hover:text-blue-500">
-            Terms of Service
-          </a>{' '}
-          and{' '}
-          <a href="#" className="font-semibold leading-6 text-blue-600 hover:text-blue-500">
-            Privacy Policy
-          </a>
-        </p>
+          <button
+            onClick={handleLogin}
+            className="w-full flex items-center justify-center gap-3 bg-black hover:bg-gray-800 text-white rounded-lg py-3 px-4 transition-colors"
+          >
+            <FaGithub className="text-xl" />
+            <span>Continue with GitHub</span>
+          </button>
+
+          <p className="text-center text-sm text-gray-500 mt-6">
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </p>
+        </div>
       </div>
     </div>
   );

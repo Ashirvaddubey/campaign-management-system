@@ -13,6 +13,7 @@ import AudiencePage from './pages/AudiencePage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { testSupabaseConnection } from './lib/supabase';
 import { testOpenAIConnection } from './lib/openai';
+import { Toaster } from 'react-hot-toast';
 
 // Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -44,8 +45,18 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppRoutes />
+        <Routes>
+          {/* Redirect root to login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/campaigns/new" element={<NewCampaignPage />} />
+          <Route path="/audience" element={<AudiencePage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+        </Routes>
       </Router>
+      <Toaster position="top-right" />
     </AuthProvider>
   );
 }

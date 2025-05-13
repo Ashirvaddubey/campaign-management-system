@@ -1,151 +1,84 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { User } from '../types';
-import { supabase, getRedirectUrl } from '../lib/supabase';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { User } from '@supabase/supabase-js';
+import toast from 'react-hot-toast';
 
 interface AuthContextType {
   user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  loading: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
-  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
-      try {
-        console.log('Checking session...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        
-        if (session?.user) {
-          console.log('Session found:', session.user);
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '',
-            avatar: session.user.user_metadata?.avatar_url || '',
-          });
-        } else {
-          console.log('No session found');
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        setError('Failed to check authentication session');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkSession();
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '',
-          avatar: session.user.user_metadata?.avatar_url || '',
-        });
-        setError(null);
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    // Listen for changes on auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-      console.log('Starting login process...');
-      console.log('Redirect URL:', getRedirectUrl());
-      
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: 'github',
         options: {
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-          redirectTo: getRedirectUrl(),
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       });
-      
-      if (error) {
-        console.error('Login error:', error);
-        throw error;
-      }
-      
-      console.log('Login initiated successfully');
+
+      if (error) throw error;
     } catch (error) {
-      console.error('Login failed:', error);
-      setError('Failed to sign in with Google');
-      throw error;
-    } finally {
-      setIsLoading(false);
+      toast.error('Failed to sign in. Please try again.');
+      console.error('Error:', error);
     }
   };
 
   const logout = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-      console.log('Starting logout process...');
-      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
-      setUser(null);
-      console.log('Logout successful');
+      navigate('/login');
     } catch (error) {
-      console.error('Logout failed:', error);
-      setError('Failed to sign out');
-      throw error;
-    } finally {
-      setIsLoading(false);
+      toast.error('Failed to sign out. Please try again.');
+      console.error('Error:', error);
     }
   };
 
+  const value = {
+    user,
+    loading,
+    login,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider 
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        logout,
-        error,
-      }}
-    >
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
-};
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
